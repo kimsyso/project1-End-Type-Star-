@@ -24,12 +24,60 @@
 
 위 본문을 바탕으로 본 프로젝트에선 항성의 온도, 질량, 스펙트럼 유형, 현재 항성의 유형을 고려하여 항성의 최종 형태를 AI를 활용하여 예측하는 것이 목적이다.
 
+
+
 ---
+
+
 
 ## 2. 사용 데이터
 
 Train과 Test data를 같은 data를 사용하면 모델 성능을 파악하는데 제대로 알 수 없기 때문에 Test data를 통한 모델 성능을 잘 보기 위해서 일부러 두 data를 다른 data set을 사용하였다.
 
-Train data는 kaggle에서 가져왔다. 출처: 
+Train data는 kaggle에서 가져왔다. [kaggle_Train_data](https://www.kaggle.com/datasets/vinesmsuic/star-categorization-giants-and-dwarfs)
 
-본 data는 항성의 유형 중 거성과 왜성을 분류하기 위한 data로 프로젝트에선 이를 활용하여 
+본 data는 항성의 유형 중 거성과 왜성을 분류하기 위한 data로 프로젝트에선 이를 활용하여 모델을 학습 시킬때 사용할 것이다.
+
+
+Test data는 NASA EXOPLANET ARCHIVE에서 가져왔다. [nasa_archive_Test_data](https://exoplanetarchive.ipac.caltech.edu/)
+
+실제 archive에선 항성에 대한 수많은 열들이 있으며, data를 가져올떈 자신이 하고자 하는 목적에 맞추어 열을 골라 가져와야 한다.
+
+필자도 프로젝트의 목적에 부합하기 위해 질량, 온도, 스펙트럼 유형에 관한 열만 가지고 왔다. 
+
+이 두 data에 대한 자세한 전처리 과정은 다음을 참고하면 된다.
+
+[Data pre_processing](https://github.com/kimsyso/project1-End-Type-Star-/raw/main/data_preprocessing.ipynb)
+
+
+---
+
+
+## 3. 모델 설명
+
+본 프로젝트의 목적은 '예측' 즉, '회귀' 문제를 다루는 것이기 때문에 회귀 모델을 사용하였으며, 여러 모델 중 Decision Tree, Random Forest, CatBoost, AdaBoost 이 4종류를 사용하여 학습을 진행하였다.
+
+
+
+---
+
+
+## 4. 결과
+
+
+---
+
+
+## 5. 추후 개선 사항
+
+모델의 실행 결과 처음 프로젝트를 시작했을때, 예상하였던 결과와 많이 달라져 있었다. model이 test data에 대해 잘 예측하지 못하고 있음을 알 수 있었다.
+
+이러한 현상이 나타나는 이유에 대해서는 여러 원인이 있겠지만, 필자가 짐작하는 확실한 이유가 있다.
+
+바로 data이다. 
+
+필자는 train data가 가지고 있었던 문제를 해결하기 위해 직접 수학적 공식을 사용하여 문제를 해결하였다. 
+
+하지만 수학 공식을 사용하면서 정수형이 그대로 사용되게 되었고, 이는 실수형이었던 Test data와 단위 차이가 발생한 것이다. 그렇기에 이런 요소들이 모델을 학습하는데 영향을 주었고 그로인해 test의 예측이 낮아졌을거라 예상한다.
+
+추후에 test data에 대해 train data와 같이 직접 수학적 공식을 사용하여 단위를 맞춰주어 다시 학습 모델을 진행하고 이전 결과와 어떤 차이가 있는지 비교할 예정이다.
