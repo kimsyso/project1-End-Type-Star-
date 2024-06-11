@@ -93,7 +93,7 @@ CatBoost를 사용하기 위해 pip을 통해 설치해주고 최적의 하이�
  
   - RandomForestRegressor, AdaBoostRegressor, VotingRegressor(optuna한 결과 voting)
  
-  - mean_absolute_error, mean_squared_error, r2_score(모델 성믕평가 지표)
+  - mean_absolute_error, mean_squared_error, r2_score(모델 성능능평가 지표)
 
 - CatBoostRegressor
 
