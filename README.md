@@ -55,7 +55,57 @@ Test data는 NASA EXOPLANET ARCHIVE에서 가져왔다. [nasa_archive_Test_data]
 
 ## 3. 모델 설명
 
+[Model_Learning](https://github.com/kimsyso/project1-End-Type-Star-/raw/main/model_learning.ipynb)
+
 본 프로젝트의 목적은 '예측' 즉, '회귀' 문제를 다루는 것이기 때문에 회귀 모델을 사용하였으며, 여러 모델 중 Decision Tree, Random Forest, CatBoost, AdaBoost 이 4종류를 사용하여 학습을 진행하였다.
+
+2의 data 전처리 과정 code를 참고하여 각 label들을 encoding시킬때, 특정 조건을 걸어 그에 따라 분류한 뒤 그 결과를 encoding 시켰다. 
+
+조건 하나하나에 대하여 결과값의 분기점이 나뉘어지는 형태를 보면서 제일 먼저 'Decision Tree' 기법이 떠올랐다. 
+
+왜냐하면 Decision Tree도 위와 마찬가지로 특정 조건에 따라 data를 분류하기 때문에 train data의 성질과 알맞다고 판단하여 사용하게 되었다.
+
+이의 개념을 확장시켜 여러 decision tree의 결과를 결합시켜 하나의 결과에 도달하는 Random Forest를 자연스럽게 사용하게 되었다.
+
+2의 전처리 과정을 참고하면 알수 있듯이 일부 열은 수치형이 아닌 범주형 data가 있었고, 이를 모델 학습하기 위해서 각 요소 별로 encoding 했다. 
+
+하지만 아무리 encoding을 진행했어도 범주형 data라는 사실은 변함 없기 때문에 어떤 모델을 사용해야 할지 고민일떄 CatBoost를 발견하게 되었다.
+
+CatBoost는 범주형 변수의 예측 모델에 최적화된 모델이며, 예측 속도가 빠를뿐 아니라 예측력을 높일 수 있는 모델이기에 정답 layer가 범주형 data의 encoding된 값인 train data에 최적의 모델이라 생각이 들어 사용했다.
+
+마지막으로 AdaBoost이다. AdaBoost는 초기에 약한 모형을 만들고 매 단계마다 이 모형의 약점을 보완해서 새로운 모형으로 순차적으로 적합시키는 방법이다.
+
+앞의 세 모델처럼 거창한 이유는 없지만 단지 새로운 모형이 앞의 세 모델보다 강력한 모형이 만들어질지 궁금했기 때문에 사용하였다.
+
+모델 학습을 위한 library는 다음과 같다. 
+
+CatBoost를 사용하기 위해 pip을 통해 설치해주고 최적의 하이퍼 파라미터를 자동으로 찾아주는 optuna기능을 각 모델마다 사용해서 그 값을 구하기 위해서 optuna도 설치해주었다.
+
+그 이외의 나머지 library는 다음과 같다.
+
+- pandas(csv file load)
+
+- sklearn(model, data split, metrics load)
+
+  - train_test_split(data 분할)
+ 
+  - DecisionTreeRegressor
+ 
+  - RandomForestRegressor, AdaBoostRegressor, VotingRegressor(optuna한 결과 voting)
+ 
+  - mean_absolute_error, mean_squared_error, r2_score(모델 성믕평가 지표)
+
+- CatBoostRegressor
+
+- optuna(함수, 파라미터 정의)
+
+  - trial(optuna 목적함수의 반복 시도 횟수 설정)
+ 
+  - TPESampler(하이퍼 파라미터 최적화 수행)
+ 
+ - matplotlib.pyplot(model 결과 시각화)
+
+ - numpy
 
 
 
@@ -63,6 +113,86 @@ Test data는 NASA EXOPLANET ARCHIVE에서 가져왔다. [nasa_archive_Test_data]
 
 
 ## 4. 결과
+
+초반엔 각 모델의 파라미터를 직접 조정하면서 최적의 파라미터를 찾으려 했었다. 
+
+하지만 decision tree를 작업하던 도중 파라미터를 몇을 넣든 최종 평가 지표의 차이가 없다는 것을 발견하고 더 이상 직접 작업하는것엔 의미가 없다 판단하여 최적의 하이퍼 파라미터를 자동으로 찾아주는 프레임 워크인 'optuna' 기능을 사용하였다.
+
+optuna 기능을 사용하여 출력된 각 모델의 최적의 하이퍼 파라미터 값과 그 평가 지표이다. 
+
+이번 프로젝트에 사용한 최종 성능 평가 지표는 MSE, MAE, 그리고 R2 score 이다.
+
+
+### - Decision Tree
+
+![optuna_decision_tree](https://github.com/kimsyso/project1-End-Type-Star-/blob/main/optuna_decision_tree.png)
+
+
+
+
+### - Random Forest
+
+![optuna_random_forest](https://github.com/kimsyso/project1-End-Type-Star-/blob/main/optuna_random_forest.png)
+
+
+
+
+### - CatBoost regressor
+
+![optuna_catboost](https://github.com/kimsyso/project1-End-Type-Star-/blob/main/optuna_catboost.png)
+
+
+
+
+### - AdaBoost regressor
+
+![optuna_adaboost](https://github.com/kimsyso/project1-End-Type-Star-/blob/main/optuna_adaboost.png)
+
+
+
+
+이후 optuna한 결과를 토대로 최종 평가지표를 구하기 위해 'votingregressor' 기능을 사용하였다.
+
+결과 출력 후 성능이 어떠한지 정확하게 판단하기 위해서 'residual plot' 과 'scatter plot'을 사용하여 시각화 하였다.
+
+
+
+
+### - Voting regressor 
+
+![voting_regressor](https://github.com/kimsyso/project1-End-Type-Star-/blob/main/voting_regressor.png)
+
+
+
+
+위의 voting regressor에 대한 시각화 결과이다.
+
+### - Residual plot(잔차학습)
+
+![residual_plot](https://github.com/kimsyso/project1-End-Type-Star-/blob/main/residual%20plot.png)
+
+
+
+
+### - Scatter plot(산점도)
+
+![scatter_plot](https://github.com/kimsyso/project1-End-Type-Star-/blob/main/scatter.png)
+
+
+
+
+위의 자료를 토대로 총평을 내리자면 optuna 기능을 사용하면서 직접 파라미터를 찾았을때의 결과보다 조금 더 나아지긴 했지만 여전히 성능이 안좋은건 동일하다.
+
+이를 더 확실하게 볼 수 있는것이 시각화 결과 였는데, 잔차학습에서 -3을 기준으로 잔차를 나누었는데 
+
+예측값이 늘어날수록 잔차가 하향세를 보이고 일부 plot들은 멀리 떨어져 있어 모델 예측이 제대로 이루어지지 않았음을 나타낸다.
+
+
+산점도에서도 위와 동일한 현상이 보였는데, 예측값이 실제값 주위에 고르게 분포되어 있지 않으며, 특정 값으로 몰리는 경향이 보인다. 
+
+이를 통해 모델이 실제값과 예측값 사이의 관계를 제대로 학습하지 못하고 있으며, 편향된 예측을 하고 있음을 알 수 있다. 
+
+모든 평가지표와 시각화 자료의 결과를 토대로 모델 성능이 현저히 낮다는 결과를 도출해낼 수 있었다.
 
 
 ---
@@ -78,6 +208,8 @@ Test data는 NASA EXOPLANET ARCHIVE에서 가져왔다. [nasa_archive_Test_data]
 
 필자는 train data가 가지고 있었던 문제를 해결하기 위해 직접 수학적 공식을 사용하여 문제를 해결하였다. 
 
-하지만 수학 공식을 사용하면서 정수형이 그대로 사용되게 되었고, 이는 실수형이었던 Test data와 단위 차이가 발생한 것이다. 그렇기에 이런 요소들이 모델을 학습하는데 영향을 주었고 그로인해 test의 예측이 낮아졌을거라 예상한다.
+하지만 수학 공식을 사용하면서 정수형이 모델 학습에 그대로 사용되게 되었고, 이는 실수형이었던 Test data와 단위 차이가 발생한 것이다. 그렇기에 이런 요소들이 모델을 학습하는데 영향을 주었고 그로인해 test의 예측이 낮아졌을거라 예상한다.
 
-추후에 test data에 대해 train data와 같이 직접 수학적 공식을 사용하여 단위를 맞춰주어 다시 학습 모델을 진행하고 이전 결과와 어떤 차이가 있는지 비교할 예정이다.
+또한 범주형 열들을 encoding 할 때, 조건을 통해 진행했는데, 그 조건을 부여하는 방식이 틀렸을수도 있다. 그로인해 data의 편향이나 사실적 오류가 발생했으리라 예상한다.
+
+추후에 test data에 대해 train data와 같이 직접 수학적 공식을 사용하여 단위를 맞춰주고 조건을 부여하는 방법을 다시 고안하여 학습 모델을 진행하고 이전 결과와 어떤 차이가 있는지 비교할 예정이다.
